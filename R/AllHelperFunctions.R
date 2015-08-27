@@ -138,7 +138,7 @@ geneDB <- geneDB[order(geneDB$gene_id)]
     rflags <- sapply(S, function(subset) .getRFlags(subset, verbose))
 
     if(verbose)
-        message("Green channel:")
+        message("\nGreen channel:")
     gflags <- sapply(S, function(subset) .getGFlags(subset, verbose))
 
     newR <- lapply(names(rflags), function(chr){
@@ -180,18 +180,18 @@ geneDB <- geneDB[order(geneDB$gene_id)]
     return(object)
 }
 
-.suppressDuplic <- function(object, verbose){
+.suppressDuplicProbes <- function(object, verbose){
     ## Set to NULL for CRAN
     ProbeName <- SystematicName <- NULL
     ChrNum <- ChrStart <- ChrEnd <- NULL
     rMedianSignal <- gMedianSignal <- NULL
     cnSet <- getCNset(object)
     cnSet <- cnSet[order(cnSet$ProbeName),]
-
+    
     if (!any(colnames(cnSet) == 'ProbeName')){
         stop('None of the columns can be identifed as ProbeNames')
     }
-
+    
     # Removing duplicated probe ids
     dup <- duplicated(cnSet$ProbeName)
     if(any(dup)){
@@ -206,32 +206,52 @@ geneDB <- geneDB[order(geneDB$gene_id)]
             gMedianSignal = median(gMedianSignal, na.rm=TRUE))
         cnSet <- rbind.data.frame(
             cnSet[!cnSet$ProbeName %in% duplicProbes,], medianSet
-            )
-        }
-
+        )
+    }
+    object@cnSet <- cnSet[order(cnSet$ChrNum, cnSet$ChrStart),]
+    
+    return(object)
+}
+.suppressDuplicLocs <- function(object, verbose){
+    cnSet <- getCNset(object)
+    cnSet <- cnSet[order(cnSet$ProbeName),]
+    
     # Removing duplicated locs
     sp <- split(cnSet, cnSet$ChrNum)
     dup <- sapply(sp, function(tmp) any(duplicated(tmp$ChrStart)) )
+    any(dup)
     if(any(dup)){
-        if(verbose)
-            message("Suppresing dulicated locs on chr ", which(dup), " ...")
-        tmp <- sp[[which(dup)]]
-        test <- duplicated(tmp$ChrStart)
-        if(any(test)){
-            loc <- tmp$ChrStart[which(test)]
-            ii <- which(tmp$ChrStart == loc)
-            tmp$gMedianSignal[ii] <- mean(tmp$gMedianSignal[ii], na.rm=TRUE)
-            tmp$rMedianSignal[ii] <- mean(tmp$rMedianSignal[ii], na.rm=TRUE)
-            tmp <- tmp[-which(test),]
+        for(d in which(dup)){
+            if(verbose)
+                message("Suppresing dulicated locs on chr ", d, " ...")
+            tmp <- sp[[d]]
+            test <- duplicated(tmp$ChrStart)
+            if(any(test)){
+                locs <- tmp$ChrStart[which(test)]
+                for(l in locs){
+                    ii <- which(tmp$ChrStart == l)
+                    tmp$gMedianSignal[ii] <- mean(tmp$gMedianSignal[ii],
+                        na.rm = TRUE)
+                    tmp$rMedianSignal[ii] <- mean(tmp$rMedianSignal[ii],
+                        na.rm = TRUE)
+                }
+                tmp <- tmp[-which(test),]
             }
-            sp[[which(dup)]] <- tmp
+            sp[[d]] <- tmp
         }
+    }
     cnSet <- as.data.frame(do.call(rbind, sp))
     cnSet <- cnSet[order(cnSet$ChrNum, cnSet$ChrStart),]
     rownames(cnSet) <- seq(1, nrow(cnSet))
-
+    
     object@cnSet <- cnSet[order(cnSet$ChrNum, cnSet$ChrStart),]
-    rownames(cnSet) <- seq(1, nrow(cnSet))
+    
+    return(object)
+}
+
+.suppressDuplic <- function(object, verbose){
+    object <- .suppressDuplicProbes(object, verbose)
+    object <- .suppressDuplicLocs(object, verbose)
 
     return(object)
 }

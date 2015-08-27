@@ -2,8 +2,8 @@ Package: rCGH
 Type: Package
 Title: Comprehensive Pipeline for Analyzing and Visualizing Agilent
     and Affymetrix Array-Based CGH Data
-Version: 0.99.7
-Date: 2015-07-18
+Version: 0.99.9
+Date: 2015-08-26
 Authors@R: c(person(given="Frederic", family="Commo", role=c("aut", "cre"), 
     email="frederic.commo@gustaveroussy.fr"))
 Maintainer: Frederic Commo <frederic.commo@gustaveroussy.fr>
@@ -16,7 +16,7 @@ Description: A comprehensive pipeline for analyzing and interactively
     Affymetrix Power Tools. This package takes over all the steps required for
     a genomic profile analysis, from reading the files to the segmentation and
     genes annotations, and provides several visualization functions (static or
-    interactive) which facilitate profiles interpretation.\\
+    interactive) which facilitate profiles interpretation.
     Input files can be in compressed format, e.g. .bz2 or .gz.
 License: Artistic-2.0
 biocViews: aCGH,CopyNumberVariation,Preprocessing,FeatureExtraction

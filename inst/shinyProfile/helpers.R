@@ -94,8 +94,8 @@
 
     if(length(idx)>0){
         subTable <- segTable[idx,]
-        GLcolors <- ifelse(subTable$seg.mean<= loss, lossCol,
-            ifelse(subTable$seg.mean>= gain, gainCol, "black")
+        GLcolors <- ifelse(subTable$seg.med <= loss, lossCol,
+            ifelse(subTable$seg.med >= gain, gainCol, "black")
             )
         gPlot <- gPlot+
             geom_segment(

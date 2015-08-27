@@ -53,7 +53,7 @@ multiplot(object4)
 
 \dontrun{
 # Interactive visalizations
-view(object5)
+view(object4)
 }
 
 }
